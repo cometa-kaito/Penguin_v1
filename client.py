@@ -32,7 +32,7 @@ def print_distribution(dist, chosen_pos, chosen_card):
         ai.get_action_distribution() の返値
     chosen_pos / chosen_card : 今回実際に採択された手
     """
-    print("\n--- 全合法手と行動確率 (上位 15) ---")
+    print("\n--- 全合法手と行動確率---")
     for pos, card, prob in sorted(dist, key=lambda x: -x[2])[:15]:
         mark = " <= chosen" if (pos == chosen_pos and card == chosen_card) else ""
         print(f"{pos or 'skip':>6}  {card or '---':>6}  {prob:.3f}{mark}")
@@ -143,7 +143,7 @@ if __name__ == "__main__":
                 sock, msg_json, board, hand, pending_id
             )
 
-        time.sleep(0.02)  # CPU 負荷を下げる軽いスリープ
+        time.sleep(0)  # CPU 負荷を下げる軽いスリープ
 
     # ---- 終了処理 ----
     sock.close()

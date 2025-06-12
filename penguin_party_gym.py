@@ -1,7 +1,8 @@
+#penguin_party_gym.py
 """
 Gymnasium ラッパ
-・任意の env_kwargs を受け取り PenguinPartyEnv に渡せるようにした
 ・action_masks() で「全 False」になった場合、index 0 (skip) を強制 True
+・step()でエピソード終了時は両者の最終報酬をinfo["final_rewards"]から取得可能
 """
 
 import numpy as np
@@ -23,13 +24,15 @@ class PenguinPartyGymEnv(gym.Env):
         self.observation_space = spaces.Dict({
             "hand":  spaces.MultiDiscrete([6] * 14),
             "board": spaces.Box(low=0, high=5, shape=(7, 13), dtype=np.uint8),
+            "action_mask": spaces.MultiBinary(self.action_space.n),
         })
 
-    # Gym API -----------------------------------------------------------
     def reset(self, *, seed=None, options=None):
         super().reset(seed=seed)
         obs = self.env.reset()
-        return self._encode_obs(obs), {}
+        enc = self._encode_obs(obs)
+        enc["action_mask"] = self.action_masks()
+        return enc, {}
 
     def step(self, action_idx: int):
         action = self.action_map[int(action_idx)]
@@ -39,21 +42,37 @@ class PenguinPartyGymEnv(gym.Env):
             obs = {"hand": [], "board": {}, "current_player": 0}
 
         encoded = self._encode_obs(obs)
+        encoded["action_mask"] = self.action_masks()
+
+        # エピソード終了時は両者の最終報酬をinfo["final_rewards"]から参照可能
+        if done and "final_rewards" in info:
+            encoded["final_rewards"] = info["final_rewards"]
+
         return encoded, reward, done, False, info
 
     def render(self):
         self.env.render()
 
-    # Maskable PPO ------------------------------------------------------
     def action_masks(self):
+        if self.env.done or self.env.current_player is None:
+            return np.zeros(self.action_space.n, dtype=bool)
+
         mask = np.zeros(self.action_space.n, dtype=bool)
-        for act in self.env.get_valid_actions():
-            mask[self.action_to_index[act]] = True
-        if not mask.any():          # 保険：必ず 1 個は True
+        valid_actions = self.env.get_valid_actions()
+
+        for act in valid_actions:
+            idx = self.action_to_index.get(act)
+            if idx is not None:
+                mask[idx] = True
+            else:
+                print(f"[ERROR] action_masks: action {act} not found in action_to_index.")
+
+        if not mask.any():
+            print("[CRITICAL] action_masks: No valid actions found; forcing action[0]=True.")
             mask[0] = True
+
         return mask
 
-    # 内部ユーティリティ ----------------------------------------------
     def _generate_action_map(self):
         colors = self.env.colors
         actions = [(None, None)]  # index 0 = skip

@@ -1,3 +1,4 @@
+#grid_search.py
 # 変更点:
 #   ・env.unwrapped.action_masks() で安全にマスクを取得
 #   ・その他ロジックはそのまま
@@ -14,9 +15,10 @@ from penguin_party_gym import PenguinPartyGymEnv
 learning_rates = [2.5e-4, 1e-4, 5e-5]
 ent_coefs      = [0.01, 0.005, 0.001]
 
-TOTAL_STEPS    = 2_000_000
-EVAL_EPISODES  = 200
-N_ENVS         = 16
+TOTAL_STEPS    = 1_000_000
+#TOTAL_STEPS    = 1_000
+EVAL_EPISODES  = 100
+N_ENVS         = 8
 
 results = []
 save_dir = Path("grid_models")
@@ -62,7 +64,7 @@ for lr, ent in product(learning_rates, ent_coefs):
         learning_rate=lr,
         ent_coef=ent,
         n_steps=2048,
-        batch_size=512,
+        batch_size=64,
         policy_kwargs=dict(net_arch=dict(pi=[256, 256], vf=[256, 256])),
         verbose=0,
     )
