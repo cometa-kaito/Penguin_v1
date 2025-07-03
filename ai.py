@@ -14,7 +14,7 @@ from sb3_contrib import MaskablePPO
 from penguin_party_gym import PenguinPartyGymEnv
 
 # ===== 定数 =====
-DEFAULT_MODEL_PATH = Path("models/critic_tuned_v2.zip")
+DEFAULT_MODEL_PATH = Path("BestModel/20250617.zip")
 CANON_COLORS = ["Green", "Red", "Blue", "Yellow", "Purple"]
 LOWER2CANON = {c.lower(): c for c in CANON_COLORS}
 

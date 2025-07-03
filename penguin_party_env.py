@@ -41,13 +41,13 @@ class PenguinPartyEnv:
             "Purple": 7,
         }
 
-        self._default_reward: Dict[str, float] = {
-            "per_card_bonus": 0.01,
-            "win_base": 10.0,
-            "win_per_diff": 10.0,
-            "lose_base": -10.0,
-            "lose_per_diff": 10.0,
-            "invalid_action_penalty": -1.0,
+        self._default_reward = {
+            "per_card_bonus": 0.1,         # 減らしたカード数を強調
+            "win_base": 2.0,               # 勝利でしっかり報酬
+            "win_per_diff": 2.0,           # 差がついたら追加報酬（抑えめ）
+            "lose_base": -2.0,             # 負けても極端に罰しない
+            "lose_per_diff": -2.0,         # 差がついてもそこまで重くしない
+            "invalid_action_penalty": -1.0 # 無効手はしっかり罰する
         }
         self.reward_config: Dict[str, float] = (
             self._default_reward
